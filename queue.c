@@ -230,6 +230,15 @@ void q_swap(struct list_head *head)
     }
 }
 
+
+/* Swap two elements' data */
+void swap_element_value(element_t *a, element_t *b)
+{
+    char *tmp = a->value;
+    a->value = b->value;
+    b->value = tmp;
+}
+
 /*
  * Reverse elements in queue
  * No effect if q is NULL or empty
@@ -237,11 +246,55 @@ void q_swap(struct list_head *head)
  * (e.g., by calling q_insert_head, q_insert_tail, or q_remove_head).
  * It should rearrange the existing ones.
  */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    if (!head || list_empty(head)) {
+        return;
+    }
+    struct list_head *h = head->next;
+    struct list_head *t = head->prev;
+    while (h != t) {
+        // swap two element.
+        swap_element_value(list_entry(h, element_t, list),
+                           list_entry(t, element_t, list));
+        if (h->next == t) {
+            // swaped latest two element, over.
+            break;
+        }
+        h = h->next;
+        t = t->prev;
+    }
+}
+
+void quickSort(struct list_head *low, struct list_head *high)
+{
+    if ((low != high) && (high->next != low)) {
+        // partition elements.
+        // using high element as pivot
+        char *pivot_value = list_entry(high, element_t, list)->value;
+        struct list_head *idx = low->prev;
+        for (struct list_head *node = low; node != high; node = node->next) {
+            element_t *current = list_entry(node, element_t, list);
+            if (strcmp(current->value, pivot_value) <= 0) {
+                idx = idx->next;
+                swap_element_value(list_entry(idx, element_t, list), current);
+            }
+        }
+        idx = idx->next;
+        swap_element_value(list_entry(idx, element_t, list),
+                           list_entry(high, element_t, list));
+        quickSort(low, idx->prev);
+        quickSort(idx->next, high);
+    }
+}
 
 /*
  * Sort elements of queue in ascending order
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    if (head && !list_empty(head))
+        quickSort(head->next, head->prev);
+}
