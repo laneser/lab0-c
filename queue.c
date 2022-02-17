@@ -29,13 +29,9 @@ void q_free(struct list_head *l)
 {
     if (l == NULL)
         return;
-    while (list_empty(l) == false) {
-        element_t *n = q_remove_head(l, NULL, 0);
-        // failed to remove? stop it or it might lead to dead loop.
-        if (n == NULL)
-            return;
+    element_t *n, *s;
+    list_for_each_entry_safe (n, s, l, list)
         q_release_element(n);
-    }
     free(l);
 }
 
