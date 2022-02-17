@@ -173,7 +173,7 @@ bool q_delete_mid(struct list_head *head)
             list_del(h);
             q_release_element(list_entry(h, element_t, list));
             break;
-        } else if (h->next == t->prev) {
+        } else if (h->next == t) {
             // length is even number, delete the bigger one.
             list_del(t);
             q_release_element(list_entry(t, element_t, list));
