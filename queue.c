@@ -18,7 +18,7 @@
 struct list_head *q_new()
 {
     struct list_head *q = malloc(sizeof(struct list_head));
-    if (q != NULL) {
+    if (q) {
         INIT_LIST_HEAD(q);
     }
     return q;
@@ -27,7 +27,7 @@ struct list_head *q_new()
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
-    if (l == NULL)
+    if (!l)
         return;
     element_t *n, *s;
     list_for_each_entry_safe (n, s, l, list)
@@ -43,10 +43,10 @@ void q_free(struct list_head *l)
 element_t *new_element(char *s)
 {
     element_t *new_ele = malloc(sizeof(element_t));
-    if (new_ele == NULL)
+    if (!new_ele)
         return NULL;
     new_ele->value = strdup(s);
-    if (new_ele->value == NULL) {
+    if (!new_ele->value) {
         free(new_ele);
         return NULL;
     }
@@ -62,10 +62,10 @@ element_t *new_element(char *s)
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
-    if (head == NULL)
+    if (!head)
         return false;
     element_t *new_ele = new_element(s);
-    if (new_ele == NULL)
+    if (!new_ele)
         return false;
     list_add(&new_ele->list, head);
     return true;
@@ -80,10 +80,10 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
-    if (head == NULL)
+    if (!head)
         return false;
     element_t *new_ele = new_element(s);
-    if (new_ele == NULL)
+    if (!new_ele)
         return false;
     list_add_tail(&new_ele->list, head);
     return true;
@@ -110,7 +110,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     }
     element_t *n = list_first_entry(head, element_t, list);
     list_del(head->next);
-    if (sp != NULL) {
+    if (sp) {
         strncpy(sp, n->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
@@ -142,14 +142,12 @@ void q_release_element(element_t *e)
  */
 int q_size(struct list_head *head)
 {
-    if (head == NULL)
-        return 0;
-
     int len = 0;
-    struct list_head *li;
-
-    list_for_each (li, head)
-        len++;
+    if (head) {
+        struct list_head *li;
+        list_for_each (li, head)
+            len++;
+    }
     return len;
 }
 
