@@ -230,7 +230,6 @@ void q_swap(struct list_head *head)
     }
 }
 
-
 /* Swap two elements' data */
 void swap_element_value(element_t *a, element_t *b)
 {
