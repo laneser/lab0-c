@@ -300,6 +300,26 @@ struct list_head *my_mergeSortList(struct list_head *head)
 {
     if (!head || !head->next)
         return head;
+
+    struct list_head *sorted_tail = head;
+    while (sorted_tail->next) {
+        if (strcmp(list_entry(sorted_tail, element_t, list)->value,
+                   list_entry(sorted_tail->next, element_t, list)->value) > 0) {
+            break;
+        }
+        sorted_tail = sorted_tail->next;
+    }
+
+    if (!sorted_tail->next) {
+        return head;
+    }
+
+    if (sorted_tail != head) {
+        struct list_head *not_sorted = sorted_tail->next;
+        sorted_tail->next = NULL;
+        return my_merge(head, my_mergeSortList(not_sorted));
+    }
+
     // use cycle detection to split list at middle
     struct list_head *slow = head;
     struct list_head *fast = head->next;
