@@ -17,6 +17,8 @@ static FILE *errfile = NULL;
 static FILE *verbfile = NULL;
 static FILE *logfile = NULL;
 
+extern int tinyweb_conn_fd;
+
 int verblevel = 0;
 static void init_files(FILE *efile, FILE *vfile)
 {
@@ -54,9 +56,9 @@ void report_event(message_t msg, char *fmt, ...)
 {
     va_list ap;
     bool fatal = msg == MSG_FATAL;
-    char *msg_name = msg == MSG_WARN    ? "WARNING"
-                     : msg == MSG_ERROR ? "ERROR"
-                                        : "FATAL ERROR";
+    char *msg_name = msg == MSG_WARN
+                         ? "WARNING"
+                         : msg == MSG_ERROR ? "ERROR" : "FATAL ERROR";
     int level = msg == MSG_WARN ? 2 : msg == MSG_ERROR ? 1 : 0;
     if (verblevel < level)
         return;
@@ -88,48 +90,49 @@ void report_event(message_t msg, char *fmt, ...)
     }
 }
 
-void report(int level, char *fmt, ...)
+// report string to verb/logfile/tinyweb
+void reports(char *msg)
 {
     if (!verbfile)
         init_files(stdout, stdout);
-
-    if (level <= verblevel) {
-        va_list ap;
-        va_start(ap, fmt);
-        vfprintf(verbfile, fmt, ap);
-        fprintf(verbfile, "\n");
-        fflush(verbfile);
-        va_end(ap);
-
-        if (logfile) {
-            va_start(ap, fmt);
-            vfprintf(logfile, fmt, ap);
-            fprintf(logfile, "\n");
-            fflush(logfile);
-            va_end(ap);
-        }
+    fputs(msg, verbfile);
+    fflush(verbfile);
+    if (logfile) {
+        fputs(msg, logfile);
+        fflush(logfile);
     }
+    if (tinyweb_conn_fd > 0) {
+        if (write(tinyweb_conn_fd, msg, strlen(msg)) < 0)
+            printf("Write web error.");
+        fsync(tinyweb_conn_fd);
+    }
+}
+
+void report(int level, char *fmt, ...)
+{
+    if (level > verblevel)
+        return;
+    va_list ap;
+    int bufsize = 1024;
+    char buf[bufsize];
+    va_start(ap, fmt);
+    vsnprintf(buf, bufsize, fmt, ap);
+    va_end(ap);
+    reports(buf);
+    reports("\n");
 }
 
 void report_noreturn(int level, char *fmt, ...)
 {
-    if (!verbfile)
-        init_files(stdout, stdout);
-
-    if (level <= verblevel) {
-        va_list ap;
-        va_start(ap, fmt);
-        vfprintf(verbfile, fmt, ap);
-        fflush(verbfile);
-        va_end(ap);
-
-        if (logfile) {
-            va_start(ap, fmt);
-            vfprintf(logfile, fmt, ap);
-            fflush(logfile);
-            va_end(ap);
-        }
-    }
+    if (level > verblevel)
+        return;
+    va_list ap;
+    int bufsize = 1024;
+    char buf[bufsize];
+    va_start(ap, fmt);
+    vsnprintf(buf, bufsize, fmt, ap);
+    va_end(ap);
+    reports(buf);
 }
 
 /* Functions denoting failures */

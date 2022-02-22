@@ -123,6 +123,8 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
  */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
+    if (!head || !head->prev)
+        return NULL;
     return q_remove_head(head->prev->prev, sp, bufsize);
 }
 

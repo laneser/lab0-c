@@ -644,7 +644,7 @@ void completion(const char *buf, linenoiseCompletions *lc)
     }
 }
 
-bool run_console(char *infile_name)
+bool run_console(char *infile_name, int *tinyweb_fd, int *tinyweb_conn_fd)
 {
     if (!push_file(infile_name)) {
         report(1, "ERROR: Could not open source file '%s'", infile_name);
@@ -654,8 +654,22 @@ bool run_console(char *infile_name)
     if (!has_infile) {
         linenoiseHistoryLoad(HISTORY_FILE); /* Load the history */
         char *cmdline;
-        while ((cmdline = linenoise(prompt)) != NULL) {
+        while ((cmdline = linenoise(prompt, *tinyweb_fd, tinyweb_conn_fd)) !=
+               NULL) {
+            if (*tinyweb_conn_fd) {
+                char header[] =
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/plain; "
+                    "charset=UTF-8\r\n\r\n";
+                // write http response header
+                if (write(*tinyweb_conn_fd, header, strlen(header)) < 0)
+                    printf("write web output error.");
+            }
             interpret_cmd(cmdline);
+            if (*tinyweb_conn_fd) {
+                fsync(*tinyweb_conn_fd);
+                close(*tinyweb_conn_fd);
+                *tinyweb_conn_fd = 0;
+            }
             linenoiseHistoryAdd(cmdline);       /* Add to the history. */
             linenoiseHistorySave(HISTORY_FILE); /* Save the history on disk. */
             linenoiseFree(cmdline);
