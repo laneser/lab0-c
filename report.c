@@ -101,7 +101,7 @@ void reports(char *msg)
         fputs(msg, logfile);
         fflush(logfile);
     }
-    if (tinyweb_conn_fd > 0) {
+    if (tinyweb_conn_fd) {
         if (write(tinyweb_conn_fd, msg, strlen(msg)) < 0)
             printf("Write web error.");
         fsync(tinyweb_conn_fd);
