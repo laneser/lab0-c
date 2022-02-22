@@ -1,5 +1,5 @@
-#ifndef __TINYWEB_H
-#define __TINYWEB_H
+#ifndef __TINY_H
+#define __TINY_H
 
 #include <sys/types.h>
 
@@ -18,4 +18,4 @@ int tinyweb_accept(int listenfd);
 // Process http request
 void parse_request(int fd, http_request *req);
 
-#endif /* __TINYWEB_H */
+#endif /* __TINY_H */
