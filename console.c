@@ -673,7 +673,7 @@ bool run_console(char *infile_name, int *tinyweb_fd, int *tinyweb_conn_fd)
             linenoiseHistoryAdd(cmdline);       /* Add to the history. */
             linenoiseHistorySave(HISTORY_FILE); /* Save the history on disk. */
             linenoiseFree(cmdline);
-            while (buf_stack->fd != STDIN_FILENO)
+            while (buf_stack && buf_stack->fd != STDIN_FILENO)
                 cmd_select(0, NULL, NULL, NULL, NULL);
             has_infile = false;
         }
