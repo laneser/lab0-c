@@ -1,5 +1,6 @@
 #ifndef LAB0_CONSOLE_H
 #define LAB0_CONSOLE_H
+
 #include <stdbool.h>
 #include <sys/select.h>
 #include "linenoise.h"
